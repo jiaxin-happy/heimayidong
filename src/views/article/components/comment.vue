@@ -112,7 +112,6 @@ export default {
           // 该评论的回复次数 +1 找到对应的评论
           // 如果找到了 comment就是找到的对象 如果找不到 comment就是一个undefined
           const comment = this.comments.find(item => item.com_id.toString() === this.reply.commentId.toString())
-          console.log(comment)
           comment && comment.reply_count++ // 如果找到  就对回复数据加1
         } else {
           // 对文章进行评论

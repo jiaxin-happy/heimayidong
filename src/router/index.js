@@ -22,6 +22,7 @@ const routes = [
     children: [
       { path: '/',
         component: Home,
+        // meta 路由元信息 meta名字是固定的 对象里面的内容可以随意定义
         meta: {
           isAlive: true // 是否缓存组件实例  meta属性 一级路由跟二级路由path相同时 需要写在二级路由上
         } }, // 二级路由 首页
