@@ -1,6 +1,7 @@
 <template>
   <div class="container">
-    <van-tabs v-model="activeIndex" swipeable>
+    <!-- 监听tabs切换事件 -->
+    <van-tabs @change="changeTab" v-model="activeIndex" swipeable>
       <van-tab :title="channel.name" v-for="channel in channels" :key="channel.id">
           <!-- 因为一个tab标签 对应一个article-list组件 -->
         <article-list @showMoreAction="openMoreAction" :channel_id="channel.id"></article-list>
@@ -55,6 +56,14 @@ export default {
     ChannelEdit
   },
   methods: {
+    // 切换tab页时触发
+    changeTab () {
+      // 通知所有的article-list实例 告诉他们 我切换页签了 把切换的页签传过去
+      // article-list组件需要 拿到传过去的页签 看看是否 是自己所在的页签
+      // 如果是自己所在的页签 就需要判断一下 自己的组件是否有滚动 如果有滚动数据 就滚动到对应的位置
+      // 触发一个公共事件 时间名叫切换页签 携带参数
+      eventBus.$emit('changeTab', this.channels[this.activeIndex].id)
+    },
     // 添加频道
     async addChannel (channel) {
       await addChannel(channel)

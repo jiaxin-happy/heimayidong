@@ -13,13 +13,18 @@ const SearchResult = () => import('@/views/search/result') // 搜索结果
 const Article = () => import('@/views/article') // 文章详情
 
 Vue.use(VueRouter)
+// 指定 哪个组件需要缓存
 
 const routes = [
   {
     path: '/',
     component: Layout, // 一级路由
     children: [
-      { path: '/', component: Home }, // 二级路由 首页
+      { path: '/',
+        component: Home,
+        meta: {
+          isAlive: true // 是否缓存组件实例  meta属性 一级路由跟二级路由path相同时 需要写在二级路由上
+        } }, // 二级路由 首页
       { path: '/question', component: Question },
       { path: '/video', component: Video },
       { path: '/user', component: User }

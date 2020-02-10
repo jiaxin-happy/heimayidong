@@ -1,7 +1,7 @@
 <template>
   <!-- 这里注意 这个div设置了滚动条 目的是 给后面做 阅读记忆 留下伏笔 -->
   <!-- 阅读记忆 => 看文章看到一半 滑到中部 去了别的页面 当你回来时 文章还在你看的位置 -->
-  <div class="scroll-wrapper">
+  <div ref="myScroll" class="scroll-wrapper" @scroll="remember">
     <van-pull-refresh v-model="downLoading" @refresh="onRefresh" :success-text="refreshSuccessText">
        <!-- 放置list组件list组件可以实现 上拉加载 -->
       <van-list v-model="upLoading" :finished="finished" @load="onLoad" finished-text="没有更多了">
@@ -47,6 +47,7 @@ export default {
   name: 'article-list',
   data () {
     return {
+      scrollTop: 0, // 记录滚动的位置 记录当前文章列表实例的滚动位置
       upLoading: false, // 上拉加载中
       finished: false, // 是否全部加载完成
       articles: [], // 文章列表
@@ -67,6 +68,10 @@ export default {
     }
   },
   methods: {
+    // 记录位置的方法
+    remember (event) {
+      this.scrollTop = event.target.scrollTop
+    },
     async onLoad () {
       await this.$sleep() // 等待 sleep  resovle
       // setTimeout(() => {
@@ -124,6 +129,7 @@ export default {
       }
     }
   },
+  // 即使启用了组件缓存 created函数也依然会被执行 但只会执行一次
   created () {
     // 开启监听
     eventBus.$on('delArticle', (articleId, channelId) => {
@@ -136,6 +142,30 @@ export default {
         }
       }
     })
+    // 只要开启一次监听 以后触发了事件 就会进入到回调函数
+    // 监听当前tab切换的事件
+    eventBus.$on('changeTab', id => {
+      if (id === this.channel_id) {
+        // 为什么没有滚动啊
+        // 因为切换事件后 会执行dom的更新 dom的更新是异步的
+        // 如果相等 就是找对了article-list
+        // $nextTick会保证changetab动作完成并且完成页面渲染之后执行
+        this.$nextTick(() => {
+          if (this.scrollTop && this.$refs.myScroll) {
+          // 表示该文章列表 是存在滚动的
+            this.$refs.myScroll.scrollTop = this.scrollTop
+          }
+        })
+      }
+    })
+  },
+  // 激活函数 第一次并不会被执行 而是再已经缓存后执行
+  activated () {
+    // 不为0 且dom元素存在的情况下 才去滚动
+    if (this.scrollTop && this.$refs.myScroll) {
+      // 需要在组件重新激活的时候 重新设置原来的滚动条
+      this.$refs.myScroll.scrollTop = this.scrollTop // 将原来记录的位置给dom元素
+    }
   }
 
 }
